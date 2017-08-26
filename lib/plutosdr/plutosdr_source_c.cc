@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /*
- * Copyright 2012 Dimitri Stolnikov <horiz0n@gmx.net>
+ * Copyright 2017 Dimitri Stolnikov <horiz0n@gmx.net>
  *
  * GNU Radio is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,10 +17,8 @@
  * the Free Software Foundation, Inc., 51 Franklin Street,
  * Boston, MA 02110-1301, USA.
  */
-
-#include <boost/foreach.hpp>
 #include <boost/assign.hpp>
-#include <boost/algorithm/string.hpp>
+#include <iostream>
 
 #include "arg_helpers.h"
 #include "osmosdr/source.h"
@@ -38,10 +36,7 @@ plutosdr_source_c::plutosdr_source_c(const std::string &args) :
                    gr::io_signature::make(0, 0, 0),
                    gr::io_signature::make(1, 1, sizeof(gr_complex)))
 {
-  //uri = "";
-  // FIXME: should be in args
-  uri = "ip:192.168.2.1";
-  //uri = "usb:6.29.5";
+  uri = "ip:pluto.local";
   frequency = 434000000;
   samplerate = 2500000;
   decimation = 0;
@@ -54,6 +49,12 @@ plutosdr_source_c::plutosdr_source_c(const std::string &args) :
   gain_value = 50;
   filter = "";
   filter_auto = true;
+
+  dict_t dict = params_to_dict(args);
+  if (dict.count("uri"))
+    uri = boost::lexical_cast< std::string >( dict["uri"] );
+
+  std::cerr << "Using PlutoSDR URI = " << uri << std::endl;
 
   _src = gr::iio::pluto_source::make(uri.c_str(), frequency, samplerate,
                                      decimation, bandwidth, buffer_size,
